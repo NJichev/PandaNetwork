@@ -1,5 +1,6 @@
 require_relative 'panda'
 
+# Social network class for our panda friends.
 class PandaSocialNetwork
   def initialize
     @pandas = {}
@@ -7,29 +8,29 @@ class PandaSocialNetwork
 
   def add_panda(panda)
     if @pandas[panda]
-      raise "PandaAlreadyThere"
+      fail 'PandaAlreadyThere'
     else
       @pandas[panda] = []
     end
   end
 
-  def has_panda?(panda)
+  def has_panda(panda)
     @pandas[panda] ? true : false
   end
 
   def make_friends(panda1, panda2)
-    add_panda(panda1) unless has_panda?(panda1)
-    add_panda(panda2) unless has_panda?(panda2)
+    add_panda(panda1) unless has_panda(panda1)
+    add_panda(panda2) unless has_panda(panda2)
 
     if are_friends?(panda1, panda2)
-      raise "PandasAlreadyFriends"
+      fail 'PandasAlreadyFriends'
     else
       @pandas[panda1] << panda2
       @pandas[panda2] << panda1
     end
   end
 
-  def are_friends?(panda1, panda2)
+  def are_friends(panda1, panda2)
     return true if @pandas[panda1].include? panda2
     false
   end
@@ -39,7 +40,7 @@ class PandaSocialNetwork
   end
 
   def connection_level(panda1, panda2)
-    return false unless has_panda?(panda1) && has_panda?(panda2)
+    return false unless has_panda(panda1) && has_panda(panda2)
     queue = [panda1]
     checked = []
     level = 1
@@ -51,7 +52,6 @@ class PandaSocialNetwork
         checked << panda unless checked.include? panda
         queue.push(*@pandas[panda])
       end
-
       return level if queue.include? panda2
       level += 1
     end
@@ -60,11 +60,14 @@ class PandaSocialNetwork
 
   def are_connected(panda1, panda2)
     connection = connection_level(panda1, panda2) || 0
-    if connection >= 1
+    if connection > 0
       return true
     else
       return false
     end
+  end
+
+  def how_many_gender_in_network(level, panda, gender)
   end
 end
 
@@ -84,4 +87,4 @@ network.make_friends(rado, tony)
 p network.connection_level(ivo, rado) # true
 p network.connection_level(ivo, tony) # true
 
-#network.how_many_gender_in_network(1, rado, "female") == 1 # true
+p network.how_many_gender_in_network(1, rado, 'female') == 1 # true
