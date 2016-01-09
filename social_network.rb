@@ -1,4 +1,4 @@
-requre_relative 'panda.rb'
+require_relative 'panda'
 
 class PandaSocialNetwork
   def initialize
@@ -39,24 +39,25 @@ class PandaSocialNetwork
   end
 
   def connection_level(panda1, panda2)
-    return false unless has_panda(panda1) && has_panda(panda2)
+    return false unless has_panda?(panda1) && has_panda?(panda2)
     queue = [panda1]
     checked = []
     level = 1
 
-    while not queue.empty?
+    until queue.empty?
       last = queue
-      checked.push(*queue)
-      last.each do |element|
-        queue.push element unless checked.include? element
+      queue = []
+      last.each do |panda|
+        checked << panda unless checked.include? panda
+        queue.push(*@pandas[panda])
       end
 
+      return level if queue.include? panda2
       level += 1
-      return level if queue.include? panda2 
     end
-    return -1
+    -1
   end
-  
+
   def are_connected(panda1, panda2)
     connection = connection_level(panda1, panda2) || 0
     if connection >= 1
@@ -66,3 +67,21 @@ class PandaSocialNetwork
     end
   end
 end
+
+network = PandaSocialNetwork.new
+
+ivo = Panda.new('Ivo', 'ivo@pandamail.com', 'male')
+rado = Panda.new('Rado', 'rado@pandamail.com', 'male')
+tony = Panda.new('Tony', 'tony@pandamail.com', 'female')
+
+network.add_panda(ivo)
+network.add_panda(rado)
+network.add_panda(tony)
+
+network.make_friends(ivo, rado)
+network.make_friends(rado, tony)
+
+p network.connection_level(ivo, rado) # true
+p network.connection_level(ivo, tony) # true
+
+#network.how_many_gender_in_network(1, rado, "female") == 1 # true
