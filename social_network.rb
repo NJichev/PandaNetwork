@@ -54,9 +54,12 @@ class PandaSocialNetwork
         queue = []
         last.each do |panda|
           @pandas[panda].each do |p|
-            queue << p unless checked.include?(p)
-            checked << p
+            unless last.include?(p) || checked.include?(p)
+              queue << p
+              checked << p
+            end
           end
+          checked << panda
         end
 
         e << [level, queue]
@@ -67,6 +70,17 @@ class PandaSocialNetwork
 
   def connection_level(panda1, panda2)
     return false unless has_panda(panda1) && has_panda(panda2)
+    conn_level = -1
+    panda1_friends = connections(panda1)
+
+    loop do
+      level, friends  = panda1_friends.next
+      conn_level = level if friends.include? panda2
+
+      break if friends.empty?
+    end
+
+    return conn_level
   end
 
   def are_connected(panda1, panda2)
@@ -78,7 +92,18 @@ class PandaSocialNetwork
     end
   end
 
-  def how_many_gender_in_network(level, panda, gender)
+  def how_many_gender_in_network(conn_level, panda, gender)
+    is_gender = (gender + '?').to_s
+    count_of_gender_friends = 0
+    friends_level = connections(panda)
+
+    loop do
+      level, friends = friends_level.next
+      count_of_gender_friends += friends.count { |f| f.send is_gender }
+      break if friends.empty? || level >= conn_level
+    end
+
+    count_of_gender_friends
   end
 
   def save(file_name)
@@ -110,7 +135,7 @@ class PandaSocialNetwork
         friends.each do |friend_email|
           panda_objs.each do |panda|
             if panda.email == friend_email
-              network.make_friends(panda_objs[index], panda) unless network.are_friends?(panda_objs[index], panda)
+              network.make_friends(panda_objs[index], panda) unless network.are_friends(panda_objs[index], panda)
               break
             end
           end
@@ -123,43 +148,43 @@ class PandaSocialNetwork
   end
 end
 
-network = PandaSocialNetwork.new
-
-ivo = Panda.new('Ivo', 'ivo@pandamail.com', 'male')
-rado = Panda.new('Rado', 'rado@pandamail.com', 'male')
-tony = Panda.new('Tony', 'tony@pandamail.com', 'female')
-pesho = Panda.new('Pesho', 'peshomail.com', 'male')
-
-network.add_panda(ivo)
-network.add_panda(rado)
-network.add_panda(tony)
-network.add_panda(pesho)
-
-network.make_friends(ivo, rado)
-network.make_friends(rado, tony)
-network.make_friends(rado, pesho)
-network.make_friends(ivo, pesho)
-
-# p network.connection_level(ivo, rado) # true
-# p network.connection_level(ivo, tony) # true
-enum = network.connections(ivo) { |level, queue| p level, queue }
-p enum.next
-p enum.next
-p enum.next
-
-
-<<<<<<< HEAD
-# p network.how_many_gender_in_network(1, rado, 'female') == 1 # true
-=======
-p network.how_many_gender_in_network(1, rado, 'female') == 1 # true
-
-network.save("social_network_save_file")
-
-network_from_file = PandaSocialNetwork.load("social_network_save_file")
-
-first = nil
-network_from_file.pandas.each_key { |panda| first = panda; break; }
-network_from_file.pandas.each_key do |panda|
-    puts "conn_lvl(#{first.name}, #{panda.name}): #{network_from_file.connection_level(first, panda)}"
-end
->>>>>>> origin
+# network = PandaSocialNetwork.new
+# 
+# ivo = Panda.new('Ivo', 'ivo@pandamail.com', 'male')
+# rado = Panda.new('Rado', 'rado@pandamail.com', 'male')
+# tony = Panda.new('Tony', 'tony@pandamail.com', 'female')
+# pesho = Panda.new('Pesho', 'peshomail.com', 'male')
+# forever_alone = Panda.new('Alone:(', 'alone@mail.com', 'male')
+# 
+# network.add_panda(ivo)
+# network.add_panda(rado)
+# network.add_panda(tony)
+# network.add_panda(pesho)
+# network.add_panda(forever_alone)
+# 
+# network.make_friends(ivo, rado)
+# network.make_friends(rado, tony)
+# network.make_friends(rado, pesho)
+# network.make_friends(ivo, pesho)
+# network.make_friends(tony, pesho)
+# 
+# p network.connection_level(ivo, rado)
+# p network.connection_level(ivo, tony)
+# p network.connection_level(ivo, forever_alone)
+ 
+# enum = network.connections(rado)
+# p enum.next
+# p enum.next
+# p enum.next
+#
+# p how_many_gender_in_network(2, tony, 'male') == 3 #true
+#
+# network.save("social_network_save_file")
+# 
+# network_from_file = PandaSocialNetwork.load("social_network_save_file")
+# 
+# first = nil
+# network_from_file.pandas.each_key { |panda| first = panda; break; }
+# network_from_file.pandas.each_key do |panda|
+#     puts "conn_lvl(#{first.name}, #{panda.name}): #{network_from_file.connection_level(first, panda)}"
+# end

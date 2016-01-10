@@ -23,10 +23,12 @@ class Panda
   end
 
   def hash
-    email.hash
+    to_s.hash
   end
 
   def to_s
     "#{name} #{email} #{gender}"
   end
+
+  alias_method :==, :eql?
 end
